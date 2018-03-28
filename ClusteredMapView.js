@@ -27,19 +27,15 @@ export default class ClusteredMapView extends PureComponent {
 
     this.state = {
       data: [], // helds renderable clusters and markers
-      region: {}, // helds current map region
+      region: props.region || props.initialRegion, // helds current map region
     }
+
+    this.isAndroid = Platform.OS === 'android'
+    this.dimensions = [props.width, props.height]
 
     this.mapRef = this.mapRef.bind(this)
     this.onClusterPress = this.onClusterPress.bind(this)
     this.onRegionChangeComplete = this.onRegionChangeComplete.bind(this)
-  }
-
-  componentWillMount() {
-    this.dimensions = [this.props.width, this.props.height]
-    this.isAndroid = Platform.OS === 'android'
-
-    this.setState({ region: this.props.region || this.props.initialRegion })
   }
 
   componentDidMount() {
@@ -86,11 +82,12 @@ export default class ClusteredMapView extends PureComponent {
   clustersChanged = (nextState) => this.state.data.length !== nextState.data.length
 
   onRegionChangeComplete = (region) => {
+    let data
     if (region.longitudeDelta <= 80) {
-      const data = this.getClusters(region)
+      data = this.getClusters(region)
       this.setState({ region, data })
     }
-    this.props.onRegionChangeComplete && this.props.onRegionChangeComplete(region)
+    this.props.onRegionChangeComplete && this.props.onRegionChangeComplete(region, data)
   }
 
   getClusters = (region) => {
